@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSPD — Официальный архив</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --bg2: #0f1215;
+    --bg3: #141820;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text2: #8a909e;
+    --text3: #555c6e;
+    --blue: #2563eb;
+    --blue-light: #3b82f6;
+    --blue-dim: rgba(37,99,235,0.12);
+    --green: #16a34a;
+    --green-light: #22c55e;
+    --green-dim: rgba(22,163,74,0.12);
+    --amber: #d97706;
+    --amber-light: #f59e0b;
+    --amber-dim: rgba(217,119,6,0.12);
+    --orange: #ea580c;
+    --orange-dim: rgba(234,88,12,0.12);
+    --red: #dc2626;
+    --red-light: #ef4444;
+    --red-dim: rgba(220,38,38,0.12);
+    --red-deep: rgba(220,38,38,0.05);
+    --accent: #2563eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border2);
+    background: var(--bg2);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-badge {
+    width: 34px;
+    height: 34px;
+    background: var(--blue);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    color: #fff;
+  }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.12em; color: var(--text); }
+  .logo-sub { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); }
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green-light);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* LAYOUT */
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    background: var(--bg2);
+  }
+  .sidebar-section { margin-bottom: 1.5rem; }
+  .sidebar-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.45rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+    color: var(--text2);
+    font-size: 13px;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+  .nav-item.active { background: var(--blue-dim); border-left-color: var(--blue); color: var(--blue-light); }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.06);
+    color: var(--text3);
+  }
+  .nav-badge.red { background: var(--red-dim); color: var(--red-light); }
+  .nav-badge.amber { background: var(--amber-dim); color: var(--amber-light); }
+  .nav-badge.green { background: var(--green-dim); color: var(--green-light); }
+
+  /* MAIN */
+  .main { padding: 2rem; overflow-y: auto; }
+
+  /* PAGES */
+  .page { display: none; animation: fadeIn 0.2s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 2rem; }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .page-subtitle { font-size: 12px; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .page-divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0 1.5rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+  .card:hover { border-color: var(--border2); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+
+  /* STAT BLOCK */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .stat-cell {
+    padding: 1rem;
+    border-right: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-key { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.3rem; }
+  .stat-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: var(--text); }
+  .stat-val.red { color: var(--red-light); }
+  .stat-val.amber { color: var(--amber-light); }
+  .stat-val.green { color: var(--green-light); }
+
+  /* BADGES */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+  .badge {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .badge-red { background: var(--red-dim); border-color: rgba(220,38,38,0.3); color: var(--red-light); }
+  .badge-amber { background: var(--amber-dim); border-color: rgba(217,119,6,0.3); color: var(--amber-light); }
+  .badge-blue { background: var(--blue-dim); border-color: rgba(37,99,235,0.3); color: var(--blue-light); }
+  .badge-green { background: var(--green-dim); border-color: rgba(22,163,74,0.3); color: var(--green-light); }
+  .badge-gray { background: rgba(255,255,255,0.04); border-color: var(--border2); color: var(--text2); }
+
+  /* SECTION LABEL */
+  .slabel {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.6rem;
+    margin-top: 1.4rem;
+  }
+  .slabel:first-child { margin-top: 0; }
+
+  /* TEXT */
+  .body-text { font-size: 13px; line-height: 1.8; color: var(--text2); margin-bottom: 0.8rem; }
+  .quote {
+    border-left: 2px solid var(--border2);
+    padding-left: 0.9rem;
+    margin: 1rem 0;
+    color: var(--text3);
+    font-size: 13px;
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* HIERARCHY */
+  .h-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .h-item:last-child { border-bottom: none; }
+  .h-rank { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); min-width: 100px; padding-top: 2px; }
+  .h-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .h-note { font-size: 11px; color: var(--text3); margin-top: 0.2rem; font-family: 'Share Tech Mono', monospace; }
+
+  /* THREAT BARS */
+  .threat-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+  .threat-name { font-size: 12px; color: var(--text3); min-width: 160px; font-family: 'Share Tech Mono', monospace; }
+  .threat-track { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .threat-fill { height: 100%; border-radius: 2px; }
+  .tf-red { background: var(--red); }
+  .tf-amber { background: var(--amber); }
+  .tf-green { background: var(--green); }
+  .tf-blue { background: var(--blue-light); }
+  .tf-gray { background: var(--text3); }
+
+  /* ROUTE ITEMS */
+  .route-item { display: flex; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .route-item:last-child { border-bottom: none; }
+  .route-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); min-width: 80px; padding-top: 2px; }
+  .route-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* WARNING BOXES */
+  .warn-red {
+    border-left: 3px solid var(--red);
+    background: var(--red-deep);
+    border-radius: 0 6px 6px 0;
+    padding: 0.9rem 1rem;
+    margin-top: 1rem;
+  }
+  .warn-amber {
+    border-left: 3px solid var(--amber);
+    background: rgba(217,119,6,0.05);
+    border-radius: 0 6px 6px 0;
+    padding: 0.9rem 1rem;
+    margin-top: 1rem;
+  }
+  .warn-blue {
+    border-left: 3px solid var(--blue);
+    background: rgba(37,99,235,0.05);
+    border-radius: 0 6px 6px 0;
+    padding: 0.9rem 1rem;
+    margin-top: 1rem;
+  }
+  .warn-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4rem; font-family: 'Share Tech Mono', monospace; }
+  .warn-red .warn-label { color: var(--red-light); }
+  .warn-amber .warn-label { color: var(--amber-light); }
+  .warn-blue .warn-label { color: var(--blue-light); }
+  .warn-text { font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+  /* UNKNOWN BOX */
+  .unknown-box {
+    border: 1px solid rgba(220,38,38,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    background: rgba(220,38,38,0.03);
+    margin: 0.8rem 0;
+  }
+  .unknown-title { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--red-light); margin-bottom: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .unknown-sub { font-size: 13px; color: var(--text3); line-height: 1.7; }
+  .unknown-stamp {
+    display: inline-block;
+    margin-top: 0.8rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid rgba(220,38,38,0.3);
+    border-radius: 4px;
+    padding: 3px 8px;
+    color: var(--red-light);
+  }
+
+  /* CLASSIFICATION SYSTEM */
+  .level-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    background: var(--bg3);
+  }
+  .level-badge-box {
+    min-width: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+  }
+  .lb-green { background: rgba(22,163,74,0.15); color: #4ade80; }
+  .lb-blue  { background: rgba(37,99,235,0.15); color: #60a5fa; }
+  .lb-amber { background: rgba(217,119,6,0.15); color: #fbbf24; }
+  .lb-orange { background: rgba(234,88,12,0.15); color: #fb923c; }
+  .lb-red   { background: rgba(220,38,38,0.15); color: #f87171; }
+  .level-content-box { padding: 0.75rem 1rem; flex: 1; border-left: 1px solid var(--border); }
+  .level-title-text { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 0.2rem; }
+  .level-desc-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .level-who-text { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* MATRIX */
+  .matrix-wrap { overflow-x: auto; margin-top: 0.6rem; }
+  .matrix { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .matrix th {
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .matrix td {
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .m-green  { background: rgba(22,163,74,0.1);  color: #4ade80; }
+  .m-blue   { background: rgba(37,99,235,0.1);  color: #60a5fa; }
+  .m-amber  { background: rgba(217,119,6,0.1);  color: #fbbf24; }
+  .m-orange { background: rgba(234,88,12,0.1);  color: #fb923c; }
+  .m-red    { background: rgba(220,38,38,0.1);  color: #f87171; }
+  .m-dark   { background: rgba(220,38,38,0.25); color: #fca5a5; }
+
+  /* EXAMPLE CARDS */
+  .ex-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .ex-code { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-bottom: 0.3rem; letter-spacing: 0.05em; }
+  .ex-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 0.3rem; }
+  .ex-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  /* SUFFIX ITEMS */
+  .suffix-row { display: flex; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .suffix-row:last-child { border-bottom: none; }
+  .suffix-code { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--blue-light); min-width: 36px; padding-top: 2px; }
+  .suffix-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* HOME PAGE */
+  .home-hero {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: 'LSPD';
+    position: absolute;
+    right: -10px;
+    top: -20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    color: rgba(255,255,255,0.02);
+    letter-spacing: 0.05em;
+    pointer-events: none;
+  }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.08em; color: var(--text); line-height: 1; margin-bottom: 0.5rem; }
+  .hero-sub { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.2rem; }
+  .hero-text { font-size: 13px; color: var(--text2); line-height: 1.8; max-width: 600px; }
+  .archive-stat-row { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .archive-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+  }
+  .archive-stat-num { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--text); }
+  .archive-stat-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+
+  .quick-access { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin-bottom: 1.5rem; }
+  .qa-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .qa-card:hover { border-color: var(--border2); background: rgba(255,255,255,0.02); }
+  .qa-code { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 0.4rem; }
+  .qa-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 0.2rem; }
+  .qa-status { font-size: 11px; color: var(--text3); }
+
+  /* TICKER */
+  .ticker {
+    background: rgba(37,99,235,0.08);
+    border-top: 1px solid rgba(37,99,235,0.2);
+    border-bottom: 1px solid rgba(37,99,235,0.2);
+    padding: 0.4rem 0;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 3rem;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--blue-light); letter-spacing: 0.06em; }
+  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ZONE GRID */
+  .zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-top: 0.6rem; }
+  .zone-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem; }
+  .zone-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 0.3rem; }
+  .zone-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  hr.section-div { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .quick-access { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3, .zone-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-badge">LS</div>
+      <div>
+        <div class="logo-text">Los Santos Police Department</div>
+        <div class="logo-sub">Защищать и служить · Официальный архив</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      СИСТЕМА АКТИВНА
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Навигация</div>
+      <div class="nav-item active" onclick="showPage('home')"><div class="nav-dot"></div> Главная</div>
+      <div class="nav-item" onclick="showPage('classification')"><div class="nav-dot"></div> Классификация <span class="nav-badge">REG</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Фракции · Досье</div>
+      <div class="nav-item" onclick="showPage('vagos')"><div class="nav-dot"></div> Los Santos Vagos <span class="nav-badge amber">C-4</span></div>
+      <div class="nav-item" onclick="showPage('sangre')"><div class="nav-dot"></div> Santuario de Sangre <span class="nav-badge red">E-5</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Система</div>
+      <div class="nav-item" onclick="showPage('lore')"><div class="nav-dot"></div> Обзор обстановки</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="ticker">
+        <div class="ticker-inner">
+          <span class="ticker-item">▸ ВНИМАНИЕ: Несанкционированный доступ к материалам выше уровня допуска является уголовно наказуемым нарушением</span>
+          <span class="ticker-item">▸ СТАТУС СИСТЕМЫ: АКТИВНА</span>
+          <span class="ticker-item">▸ АКТИВНЫХ ДЕЛ: 47</span>
+          <span class="ticker-item">▸ ДЕЛ СО СТАТУСОМ "ЗАМОРОЖЕНО": 12</span>
+          <span class="ticker-item">▸ ВНИМАНИЕ: Несанкционированный доступ к материалам выше уровня допуска является уголовно наказуемым нарушением</span>
+          <span class="ticker-item">▸ СТАТУС СИСТЕМЫ: АКТИВНА</span>
+          <span class="ticker-item">▸ АКТИВНЫХ ДЕЛ: 47</span>
+          <span class="ticker-item">▸ ДЕЛ СО СТАТУСОМ "ЗАМОРОЖЕНО": 12</span>
+        </div>
+      </div>
+
+      <div class="home-hero">
+        <div class="hero-title">Архив LSPD</div>
+        <div class="hero-sub">Los Santos Police Department · Закрытая база данных · Версия 4.1</div>
+        <div class="hero-text">Добро пожаловать в официальную архивную систему LSPD. Доступ к материалам ограничен в соответствии с уровнем допуска сотрудника. Все обращения к архиву фиксируются и могут быть использованы в рамках внутренних расследований.</div>
+        <div class="archive-stat-row">
+          <div class="archive-stat"><div class="archive-stat-num">47</div><div class="archive-stat-label">Активных дел</div></div>
+          <div class="archive-stat"><div class="archive-stat-num">12</div><div class="archive-stat-label">Заморожено</div></div>
+          <div class="archive-stat"><div class="archive-stat-num">2</div><div class="archive-stat-label">Фракций E-уровня</div></div>
+          <div class="archive-stat"><div class="archive-stat-num">9</div><div class="archive-stat-label">Потерь за год</div></div>
+        </div>
+      </div>
+
+      <div class="slabel">Быстрый доступ · Активные досье</div>
+      <div class="quick-access">
+        <div class="qa-card" onclick="showPage('vagos')">
+          <div class="qa-code">C-4-A · ФРАКЦИЯ</div>
+          <div class="qa-name">Los Santos Vagos</div>
+          <div class="qa-status">Активное расследование</div>
+        </div>
+        <div class="qa-card" onclick="showPage('sangre')">
+          <div class="qa-code">E-5-F · КАРТЕЛЬ</div>
+          <div class="qa-name">Santuario de Sangre</div>
+          <div class="qa-status">Федеральный флаг · Критическая угроза</div>
+        </div>
+        <div class="qa-card" onclick="showPage('classification')">
+          <div class="qa-code">A-1 · РЕГЛАМЕНТ</div>
+          <div class="qa-name">Система классификации</div>
+          <div class="qa-status">Редакция 3.2 · Действующая</div>
+        </div>
+      </div>
+
+      <div class="warn-red">
+        <div class="warn-label">Предупреждение системы безопасности</div>
+        <div class="warn-text">Три агента работавших по делу E-5 за последние пять лет — мертвы. Официальные причины: несчастный случай, суицид, ограбление. Дела закрыты. Если вы получили доступ к этому архиву без надлежащего уровня допуска — немедленно покиньте систему и сообщите руководству.</div>
+      </div>
+    </div>
+
+    <!-- CLASSIFICATION -->
+    <div class="page" id="page-classification">
+      <div class="page-header">
+        <div class="page-title">Система классификации</div>
+        <div class="page-subtitle">Внутренний регламент · Редакция 3.2 · Обязательна к исполнению</div>
+      </div>
+      <hr class="page-divider">
+
+      <div class="body-text">Каждое дело в архиве LSPD имеет двойной индекс: буква обозначает уровень допуска, цифра — степень опасности объекта. Индекс присваивается при заведении дела и может быть повышен, но никогда не понижается без санкции начальника отдела.</div>
+
+      <div class="slabel">Уровни допуска · Буквенный индекс</div>
+      <div class="level-row"><div class="level-badge-box lb-green">A</div><div class="level-content-box"><div class="level-title-text">Открытый доступ</div><div class="level-desc-text">Административные материалы, публичные отчёты, завершённые дела без оперативной ценности.</div><div class="level-who-text">Кто имеет доступ: весь личный состав LSPD</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-blue">B</div><div class="level-content-box"><div class="level-title-text">Служебный доступ</div><div class="level-desc-text">Активные оперативные дела, материалы наблюдения, досье на лиц под подозрением.</div><div class="level-who-text">Кто имеет доступ: офицеры от сержанта и выше</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-amber">C</div><div class="level-content-box"><div class="level-title-text">Ограниченный доступ</div><div class="level-desc-text">Дела с агентурными источниками, операции под прикрытием, материалы по организованной преступности.</div><div class="level-who-text">Кто имеет доступ: детективы спецотделов, лейтенанты и выше</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-orange">D</div><div class="level-content-box"><div class="level-title-text">Конфиденциально</div><div class="level-desc-text">Межведомственные операции, материалы по коррупции внутри структур, данные о защищённых свидетелях.</div><div class="level-who-text">Кто имеет доступ: капитаны, начальники отделов, ОВД</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-red">E</div><div class="level-content-box"><div class="level-title-text">Совершенно секретно</div><div class="level-desc-text">Транснациональные картели, операции с федеральными структурами, угрозы национальной безопасности. Доступ — только в спецхране, без выноса.</div><div class="level-who-text">Кто имеет доступ: начальник LSPD, руководство СТО, федеральные агенты с санкцией</div></div></div>
+
+      <div class="slabel">Уровни опасности · Цифровой индекс</div>
+      <div class="level-row"><div class="level-badge-box lb-green">1</div><div class="level-content-box"><div class="level-title-text">Минимальная угроза</div><div class="level-desc-text">Мелкие правонарушения, одиночные лица без организационных связей. Вооружённость маловероятна.</div><div class="level-who-text">Пример: бытовые конфликты, мелкое хулиганство</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-blue">2</div><div class="level-content-box"><div class="level-title-text">Умеренная угроза</div><div class="level-desc-text">Лица с криминальной историей, малые группировки без чёткой иерархии. Возможна вооружённость.</div><div class="level-who-text">Пример: уличные группы, мелкий наркосбыт</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-amber">3</div><div class="level-content-box"><div class="level-title-text">Повышенная угроза</div><div class="level-desc-text">Организованные уличные банды с территориальным контролем. Требуется тактическая подготовка.</div><div class="level-who-text">Пример: районные банды среднего уровня</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-orange">4</div><div class="level-content-box"><div class="level-title-text">Высокая угроза</div><div class="level-desc-text">Крупные структуры с вооружением военного класса. Прямое столкновение без подготовки — недопустимо.</div><div class="level-who-text">Пример: Los Santos Vagos</div></div></div>
+      <div class="level-row"><div class="level-badge-box lb-red">5</div><div class="level-content-box"><div class="level-title-text">Критическая угроза</div><div class="level-desc-text">Транснациональные структуры с проникновением в госорганы, устранением агентов, неограниченными ресурсами.</div><div class="level-who-text">Пример: Santuario de Sangre</div></div></div>
+
+      <div class="slabel">Матрица классификации</div>
+      <div class="matrix-wrap">
+        <table class="matrix">
+          <tr><th>Допуск \ Опасность</th><th>1 — Мин.</th><th>2 — Умер.</th><th>3 — Повыш.</th><th>4 — Высок.</th><th>5 — Крит.</th></tr>
+          <tr><th>A — Открытый</th><td class="m-green">A-1</td><td class="m-green">A-2</td><td class="m-blue">A-3</td><td class="m-amber">A-4</td><td class="m-red">A-5</td></tr>
+          <tr><th>B — Служебный</th><td class="m-green">B-1</td><td class="m-blue">B-2</td><td class="m-blue">B-3</td><td class="m-amber">B-4</td><td class="m-red">B-5</td></tr>
+          <tr><th>C — Огранич.</th><td class="m-blue">C-1</td><td class="m-blue">C-2</td><td class="m-amber">C-3</td><td class="m-orange">C-4</td><td class="m-red">C-5</td></tr>
+          <tr><th>D — Конфид.</th><td class="m-blue">D-1</td><td class="m-amber">D-2</td><td class="m-orange">D-3</td><td class="m-orange">D-4</td><td class="m-red">D-5</td></tr>
+          <tr><th>E — Сов. секр.</th><td class="m-amber">E-1</td><td class="m-orange">E-2</td><td class="m-red">E-3</td><td class="m-red">E-4</td><td class="m-dark">E-5</td></tr>
+        </table>
+      </div>
+
+      <div class="slabel" style="margin-top:1.5rem">Суффиксы к индексу</div>
+      <div class="card">
+        <div class="suffix-row"><div class="suffix-code">-X</div><div class="suffix-text">Дело заморожено по политическим или процессуальным причинам. Расследование приостановлено.</div></div>
+        <div class="suffix-row"><div class="suffix-code">-A</div><div class="suffix-text">Активная операция. Дело в работе прямо сейчас. Параллельный доступ ограничен.</div></div>
+        <div class="suffix-row"><div class="suffix-code">-K</div><div class="suffix-text">Связан с гибелью сотрудника LSPD. Автоматически уведомляется командование при каждом обращении.</div></div>
+        <div class="suffix-row"><div class="suffix-code">-U</div><div class="suffix-text">Объект не установлен. Личность или структура под кодовым именем.</div></div>
+        <div class="suffix-row"><div class="suffix-code">-F</div><div class="suffix-text">Федеральный флаг. К делу имеют доступ федеральные структуры — ФБР, DEA, Минюст.</div></div>
+      </div>
+
+      <div class="slabel">Примеры классификации реальных дел</div>
+      <div class="grid-3">
+        <div class="ex-card"><div class="ex-code">A-1</div><div class="ex-name">Административный архив</div><div class="ex-desc">Закрытые дела о мелких нарушениях, протоколы, журналы дежурств.</div></div>
+        <div class="ex-card"><div class="ex-code">B-3</div><div class="ex-name">Районные группировки</div><div class="ex-desc">Активные дела по уличным бандам без федерального статуса.</div></div>
+        <div class="ex-card"><div class="ex-code">C-4</div><div class="ex-name">Los Santos Vagos</div><div class="ex-desc">Агентурные источники, маршруты, иерархия. Только спецотдел.</div></div>
+        <div class="ex-card"><div class="ex-code">D-4</div><div class="ex-name">Коррупция в структурах</div><div class="ex-desc">Внутренние расследования. Имена сотрудников под подозрением.</div></div>
+        <div class="ex-card"><div class="ex-code">D-3-U</div><div class="ex-name">Vigilante</div><div class="ex-desc">Неустановленное лицо, серия нападений на членов Vagos.</div></div>
+        <div class="ex-card" style="border-color:rgba(220,38,38,0.25)"><div class="ex-code" style="color:var(--red-light)">E-5-F</div><div class="ex-name">Santuario de Sangre</div><div class="ex-desc">Максимальный допуск. Только спецхран. Федеральный флаг.</div></div>
+      </div>
+    </div>
+
+    <!-- VAGOS -->
+    <div class="page" id="page-vagos">
+      <div class="page-header">
+        <div class="badge-row">
+          <span class="badge badge-amber">C-4-A</span>
+          <span class="badge badge-red">Высокая угроза</span>
+          <span class="badge badge-gray">Наркотрафик</span>
+          <span class="badge badge-gray">Импорт</span>
+        </div>
+        <div class="page-title">Los Santos Vagos</div>
+        <div class="page-subtitle">Уличная банда / Наркокартель · Основана ок. 1987 · Действующая</div>
+      </div>
+      <hr class="page-divider">
+
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-key">Численность</div><div class="stat-val">180 — 240</div></div>
+        <div class="stat-cell"><div class="stat-key">Основной товар</div><div class="stat-val">Кокаин, марихуана</div></div>
+        <div class="stat-cell"><div class="stat-key">Годовой оборот</div><div class="stat-val amber">$28–40 млн</div></div>
+        <div class="stat-cell"><div class="stat-key">Связи за рубежом</div><div class="stat-val amber">Подтверждены</div></div>
+      </div>
+
+      <div class="body-text">Los Santos Vagos — старейшая латиноамериканская уличная организация Лос-Сантоса. За почти сорок лет они прошли путь от районной банды до полноценной наркодистрибьюторской сети с выходом на мексиканские картели. Сегодня это структура с логистикой, финансовым менеджментом и собственной службой безопасности.</div>
+      <div class="body-text">Их сила — в глубокой укоренённости в районах. Vagos не просто контролируют территорию, они в ней живут. Информаторов находят быстро. Любая операция требует месяцев подготовки — и всё равно даёт утечку.</div>
+
+      <div class="quote">"Вы думаете, что идёте на них. На самом деле, они уже знают что вы идёте. Вопрос только в том, дадут ли они вам дойти."<br>— Детектив, отдел по борьбе с наркотиками, 2022</div>
+
+      <hr class="section-div">
+      <div class="slabel">Иерархия</div>
+      <div class="card">
+        <div class="h-item"><div class="h-rank">Ел Хефе</div><div><div class="h-desc">Верхушка организации. Напрямую не управляет улицей — только логистикой и внешними связями. Публично не светится.</div><div class="h-note">Личность: предположительно установлена, не подтверждена</div></div></div>
+        <div class="h-item"><div class="h-rank">Капитаны</div><div><div class="h-desc">Управляют отдельными районами и направлениями — импорт, розница, силовое крыло. 3–4 человека, принимают решения автономно.</div><div class="h-note">Известно: 2 из 4 личностей установлены</div></div></div>
+        <div class="h-item"><div class="h-rank">Солдаты</div><div><div class="h-desc">Основной состав. Охрана складов, сопровождение грузов, контроль точек. Вооружены. Лояльность высокая.</div><div class="h-note">Оценка: 80–110 активных</div></div></div>
+        <div class="h-item"><div class="h-rank">Молодёжь</div><div><div class="h-desc">Низовой уровень. Мелкие поручения, слежка, розничные продажи. Управляемость — низкая, склонность к эскалации — высокая. Источник большинства несанкционированных инцидентов.</div><div class="h-note">Средний возраст: 15–19 лет</div></div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Территория</div>
+      <div class="zone-grid">
+        <div class="zone-card"><div class="zone-name">Эль-Бурро-Хайтс</div><div class="zone-desc">Исторический центр. Основные склады, явки руководства. Любой чужой будет замечен в течение минут.</div></div>
+        <div class="zone-card"><div class="zone-name">Веспуччи-Бич</div><div class="zone-desc">Зона розничного распределения. Высокая проходимость туристов — идеальное прикрытие.</div></div>
+        <div class="zone-card"><div class="zone-name">Порт Лс</div><div class="zone-desc">Точка входа импортных партий. Подставные докеры и коррумпированные таможенники.</div></div>
+        <div class="zone-card"><div class="zone-name">Буровые / пустоши</div><div class="zone-desc">Промежуточные склады за городом для крупных партий до дробления. Периодически меняют локации.</div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Маршруты импорта</div>
+      <div class="card">
+        <div class="route-item"><div class="route-label">Кокаин</div><div class="route-text">Поставки из Колумбии через мексиканских посредников. Морской путь — контейнеры через порт Лс задекларированные как стройматериалы. Партии 20–80 кг, частота раз в 2–3 недели.</div></div>
+        <div class="route-item"><div class="route-label">Марихуана</div><div class="route-text">Частично импорт из Мексики, частично — местное производство на фермах в округе Блейн. Объём производства растёт.</div></div>
+        <div class="route-item"><div class="route-label">Прикрытие</div><div class="route-text">Автомастерская в Эль-Бурро, сеть фудтраков, два магазина электроники. Формально чистые. Владельцы — номинальные.</div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Оценка угрозы</div>
+      <div class="card">
+        <div class="threat-row"><div class="threat-name">Огневая мощь</div><div class="threat-track"><div class="threat-fill tf-amber" style="width:75%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Контрразведка</div><div class="threat-track"><div class="threat-fill tf-red" style="width:85%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Коррупционные связи</div><div class="threat-track"><div class="threat-fill tf-amber" style="width:65%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Территориальный контроль</div><div class="threat-track"><div class="threat-fill tf-red" style="width:90%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Управляемость низов</div><div class="threat-track"><div class="threat-fill tf-gray" style="width:30%"></div></div></div>
+      </div>
+
+      <div class="warn-amber">
+        <div class="warn-label">Оперативная пометка</div>
+        <div class="warn-text">Несанкционированные действия низового состава в районе Веспуччи-Бич в 2023 году создали прецедент гражданских потерь. Руководство организации, по имеющимся данным, было недовольно. Двое из троих причастных до сих пор активны в структуре.</div>
+      </div>
+    </div>
+
+    <!-- SANGRE -->
+    <div class="page" id="page-sangre">
+      <div class="page-header">
+        <div class="badge-row">
+          <span class="badge badge-red">E-5-F</span>
+          <span class="badge badge-red">Критическая угроза</span>
+          <span class="badge badge-red">Транснациональный</span>
+          <span class="badge badge-amber">Глава не установлен</span>
+        </div>
+        <div class="page-title">Santuario de Sangre</div>
+        <div class="page-subtitle">Наркокартель · Год основания: неизвестен · Действующий</div>
+      </div>
+      <hr class="page-divider">
+
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-key">Численность</div><div class="stat-val">300 — 500</div></div>
+        <div class="stat-cell"><div class="stat-key">Основной товар</div><div class="stat-val">Героин, кокаин, фентанил</div></div>
+        <div class="stat-cell"><div class="stat-key">Годовой оборот</div><div class="stat-val red">$120–200 млн</div></div>
+        <div class="stat-cell"><div class="stat-key">Статус главы</div><div class="stat-val red">Не установлен</div></div>
+      </div>
+
+      <div class="body-text">Santuario de Sangre — наиболее закрытая и опасная структура действующая на территории Лос-Сантоса и за его пределами. Картель работает через посредников, подставные компании и коррумпированных чиновников — оставаясь при этом практически невидимым для стандартных оперативных методов.</div>
+      <div class="quote">"Мы знаем что они существуют потому что видим последствия. Трупы, деньги, маршруты. Но кто стоит за всем этим — мы не знаем до сих пор. Десять лет — и ни одного лица."<br>— Руководитель оперативной группы, ФБР, 2024</div>
+
+      <hr class="section-div">
+      <div class="slabel">Глава организации · El Sueño</div>
+      <div class="unknown-box">
+        <div class="unknown-title">Личность не установлена</div>
+        <div class="unknown-sub">Псевдоним: El Sueño — "Мечтатель". Предположительно мужчина, возраст 40–55 лет. Нет фотографий. Нет отпечатков. Нет биометрии. Нет подтверждённых свидетелей видевших его лично и оставшихся в живых.</div>
+        <div class="unknown-stamp">10 лет активного расследования · результат нулевой</div>
+      </div>
+      <div class="body-text" style="margin-top:0.8rem">El Sueño выстроил систему так, чтобы его физическое существование было необязательным для работы организации. Приказы передаются через цепочки посредников. Никто из задержанных членов картеля не видел его лично. Некоторые аналитики сомневаются что он вообще один человек.</div>
+      <div class="quote">"Может это имя. Может это титул. Может это несколько людей которые носят одну маску по очереди. Мы не знаем. И это — самое страшное."<br>— Аналитик отдела транснациональной преступности, 2023</div>
+
+      <hr class="section-div">
+      <div class="slabel">Иерархия</div>
+      <div class="card">
+        <div class="h-item"><div class="h-rank">El Sueño</div><div><div class="h-desc">Верховное руководство. Стратегические решения, внешние союзы, финансовые потоки. Никогда не появляется лично. Связь только через доверенных курьеров, никогда по одному каналу дважды.</div><div class="h-note">Личность: не установлена · расследование активно 10+ лет</div></div></div>
+        <div class="h-item"><div class="h-rank">Тени</div><div><div class="h-desc">Ближайший круг, 3–5 человек. Единственные кто имеет прямой контакт с El Sueño. Две личности предположительно установлены, доказательств для ареста недостаточно.</div><div class="h-note">Известно: 2 личности под наблюдением</div></div></div>
+        <div class="h-item"><div class="h-rank">Операторы</div><div><div class="h-desc">Управляют конкретными направлениями. Высокопрофессиональны. Многие имеют легальное прикрытие: бизнес, адвокатура, госслужба.</div><div class="h-note">Оценка: 15–25 активных операторов</div></div></div>
+        <div class="h-item"><div class="h-rank">Исполнители</div><div><div class="h-desc">Не знают на кого работают. Получают задания через посредников. Зачастую используют членов других банд как субподрядчиков.</div><div class="h-note">Численность неизвестна</div></div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Операционная география</div>
+      <div class="zone-grid">
+        <div class="zone-card"><div class="zone-name">Рокфорд-Хиллс</div><div class="zone-desc">Финансовый узел. Отмывание через элитную недвижимость, юридические фирмы и инвестиционные компании.</div></div>
+        <div class="zone-card"><div class="zone-name">Порт Лс</div><div class="zone-desc">Основной канал импорта. Контролируют отдельный сектор независимо от Vagos.</div></div>
+        <div class="zone-card"><div class="zone-name">Округ Блейн</div><div class="zone-desc">Производственные мощности. Лаборатории синтетики. Периметровая охрана на уровне военных баз.</div></div>
+        <div class="zone-card"><div class="zone-name">За пределами штата</div><div class="zone-desc">Картель действует минимум в четырёх штатах. Лос-Сантос — только один узел сети.</div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Оценка угрозы</div>
+      <div class="card">
+        <div class="threat-row"><div class="threat-name">Огневая мощь</div><div class="threat-track"><div class="threat-fill tf-red" style="width:95%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Контрразведка</div><div class="threat-track"><div class="threat-fill tf-red" style="width:100%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Коррупционные связи</div><div class="threat-track"><div class="threat-fill tf-red" style="width:90%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Финансовая мощь</div><div class="threat-track"><div class="threat-fill tf-red" style="width:95%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Управляемость состава</div><div class="threat-track"><div class="threat-fill tf-amber" style="width:85%"></div></div></div>
+        <div class="threat-row"><div class="threat-name">Известность / видимость</div><div class="threat-track"><div class="threat-fill tf-gray" style="width:10%"></div></div></div>
+      </div>
+
+      <div class="warn-blue" style="margin-top:1rem">
+        <div class="warn-label">Связь с Los Santos Vagos</div>
+        <div class="warn-text">По агентурным данным, Vagos периодически выступают субподрядчиками картеля на уровне розничного распределения и силовых операций. Кто именно в руководстве Vagos имеет прямой контакт — не установлено.</div>
+      </div>
+
+      <div class="warn-red">
+        <div class="warn-label">Критическое предупреждение</div>
+        <div class="warn-text">Три агента работавших по этому делу за последние пять лет — мертвы. Официальные причины: несчастный случай, суицид, ограбление. Дела закрыты. Внутреннее расследование продолжается.</div>
+      </div>
+    </div>
+
+    <!-- LORE -->
+    <div class="page" id="page-lore">
+      <div class="page-header">
+        <div class="badge-row"><span class="badge badge-gray">A-1 · Открытый доступ</span></div>
+        <div class="page-title">Обзор оперативной обстановки</div>
+        <div class="page-subtitle">Аналитический отдел LSPD · Версия 4.1</div>
+      </div>
+      <hr class="page-divider">
+
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-key">Раскрываемость тяжких</div><div class="stat-val red">31%</div></div>
+        <div class="stat-cell"><div class="stat-key">Время прибытия (Дэвис)</div><div class="stat-val amber">14 мин</div></div>
+        <div class="stat-cell"><div class="stat-key">Потери за год</div><div class="stat-val red">9 чел.</div></div>
+        <div class="stat-cell"><div class="stat-key">Укомплектованность</div><div class="stat-val red">67%</div></div>
+      </div>
+
+      <div class="body-text">Лос-Сантос — третий по величине город Соединённых Штатов. С населением свыше четырёх миллионов человек он давно перестал быть просто городом кино и денег. За фасадом из стекла и пальм скрывается инфраструктура которую не показывают туристам: перегруженные морги, тюрьмы под завязку, районы где скорая помощь не выезжает без полицейского эскорта.</div>
+      <div class="body-text">Коррупция проникла глубже, чем признаёт официальная статистика. Это не заговор — это система. Система которая работает именно потому, что никто не заинтересован её менять.</div>
+
+      <hr class="section-div">
+      <div class="slabel">Районы и угрозы</div>
+      <div class="quote">"Каждый район — это отдельная юрисдикция. Заходишь в Strawberry без брифинга — ты уже потерял инициативу."<br>— Сержант оперативного отдела, инструктаж новобранцев</div>
+      <div class="zone-grid">
+        <div class="zone-card"><div class="zone-name">Сэнтос / Саут-Лс</div><div class="zone-desc">Высокая плотность населения, узкие улицы. Каждый третий дом — явочная квартира или склад. Оперативное время реагирования критически высокое.</div></div>
+        <div class="zone-card"><div class="zone-name">Дэвис</div><div class="zone-desc">Зона конфликта между несколькими группировками. Гражданское население не доверяет ни одной из сторон — включая полицию.</div></div>
+        <div class="zone-card"><div class="zone-name">Вайнвуд / Рокфорд</div><div class="zone-desc">Организованная преступность в белых воротничках. Связи в городском совете. Операции требуют юридического сопровождения.</div></div>
+        <div class="zone-card"><div class="zone-name">Порт Лс / Промзона</div><div class="zone-desc">Контрабанда, трафик, нелегальные мастерские. Лабиринт складов с минимальным освещением.</div></div>
+      </div>
+
+      <hr class="section-div">
+      <div class="slabel">Состояние LSPD</div>
+      <div class="body-text">LSPD укомплектован на 67% от нормы. Текучка среди опытных сотрудников — рекордная за двадцать лет. Неофициально: выгорание, давление руководства, угрозы семьям. Специальный тактический отдел остаётся единственным подразделением с полной боеготовностью.</div>
+      <div class="quote">"Мы не решаем проблему. Мы сдерживаем её. Разница важна — особенно когда ты стоишь в дверях и ждёшь команды на вход."</div>
+
+      <div class="warn-red">
+        <div class="warn-label">Примечание для личного состава</div>
+        <div class="warn-text">Лос-Сантос не сломан. Он работает именно так, как задумано теми, кто извлекает из этого выгоду. Ваша задача — вернуться домой и не дать невиновным людям погибнуть сегодня ночью. Всё остальное — потом.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    event.currentTarget && event.currentTarget.classList.add('active');
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + id + "'")) {
+        item.classList.add('active');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
