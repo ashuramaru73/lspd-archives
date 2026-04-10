@@ -1017,12 +1017,22 @@ const DB_PERSONS = [
   },
 ];
 
-// Хранилище тикетов (localStorage — общее для всех пользователей LSPD ARCHIVE)
+// Хранилище тикетов — берём из DB_PERSONS (видны всем) + localStorage (локальные дополнения)
+function getPersonObj(personId) {
+  return DB_PERSONS.find(function(p) { return p.id === personId; });
+}
+
 function getTickets(personId) {
+  var person = getPersonObj(personId);
+  var base = person && person.tickets ? person.tickets.slice() : [];
   try {
     var stored = localStorage.getItem('lspd_tickets_' + personId);
-    return stored ? JSON.parse(stored) : [];
-  } catch(e) { return []; }
+    if (stored) {
+      var local = JSON.parse(stored);
+      base = base.concat(local);
+    }
+  } catch(e) {}
+  return base;
 }
 
 function saveTickets(personId, tickets) {
@@ -1122,14 +1132,21 @@ function dbSubmitTicket(personId) {
     return;
   }
 
-  var tickets = getTickets(personId);
-  tickets.push({
+  // Добавляем только в localStorage (getTickets сам мержит с DB_PERSONS)
+  var localTickets = [];
+  try {
+    var stored = localStorage.getItem('lspd_tickets_' + personId);
+    if (stored) localTickets = JSON.parse(stored);
+  } catch(e) {}
+  localTickets.push({
     reason: reason,
     date:   date,
     desc:   desc,
     author: 'Det. [' + curLevel + ']'
   });
-  saveTickets(personId, tickets);
+  try {
+    localStorage.setItem('lspd_tickets_' + personId, JSON.stringify(localTickets));
+  } catch(e) {}
 
   // Перерендериваем список тикетов
   dbOpenPerson(personId);
