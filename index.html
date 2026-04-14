@@ -856,7 +856,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+const firebaseConfig = {
+  databaseURL: 'https://lspdarchives-default-rtdb.europe-west1.firebasedatabase.app'
+};
+firebase.initializeApp(firebaseConfig);
+const fbDb = firebase.database();
+
 const PASSWORDS={A:'patrol',B:'officer',C:'detective',D:'captain',E:'director'};
 const ACCESS_LEVELS={A:1,B:2,C:3,D:4,E:5};
 const PAGE_REQ={home:0,classification:0,lore:0,vagos:3,sangre:5,seed:4,wanted:2,cases:2,database:3};
@@ -1017,29 +1025,73 @@ const DB_PERSONS = [
   },
 ];
 
-// Хранилище тикетов — берём из DB_PERSONS (видны всем) + localStorage (локальные дополнения)
+// Хранилище тикетов — Firebase Realtime Database (видны всем пользователям)
+var fbTicketsCache = {}; // personId -> [{reason,date,desc,author,key}]
+
 function getPersonObj(personId) {
   return DB_PERSONS.find(function(p) { return p.id === personId; });
 }
 
 function getTickets(personId) {
-  var person = getPersonObj(personId);
-  var base = person && person.tickets ? person.tickets.slice() : [];
-  try {
-    var stored = localStorage.getItem('lspd_tickets_' + personId);
-    if (stored) {
-      var local = JSON.parse(stored);
-      base = base.concat(local);
-    }
-  } catch(e) {}
-  return base;
+  return fbTicketsCache[personId] || [];
 }
 
-function saveTickets(personId, tickets) {
-  try {
-    localStorage.setItem('lspd_tickets_' + personId, JSON.stringify(tickets));
-  } catch(e) {}
+// Подписка на тикеты из Firebase для всех персон
+function initFirebaseTickets() {
+  DB_PERSONS.forEach(function(p) {
+    fbDb.ref('tickets/' + p.id).on('value', function(snap) {
+      var arr = [];
+      snap.forEach(function(child) {
+        var t = child.val();
+        t.key = child.key;
+        arr.push(t);
+      });
+      fbTicketsCache[p.id] = arr;
+      // Обновляем UI если открыта эта карточка
+      var listEl = document.getElementById('ticket-list-' + p.id);
+      if (listEl) {
+        refreshTicketList(p.id);
+      }
+      // Обновляем бейджи в гриде
+      var gridEl = document.getElementById('db-grid');
+      if (gridEl && gridEl.innerHTML) dbFilterGrid();
+    });
+  });
 }
+
+function refreshTicketList(personId) {
+  var listEl = document.getElementById('ticket-list-' + personId);
+  if (!listEl) return;
+  var tickets = getTickets(personId);
+  var canRemove = ACCESS_LEVELS[curLevel] >= 3;
+  if (tickets.length === 0) {
+    listEl.innerHTML = '<div class="ticket-empty">Тикетов нет</div>';
+  } else {
+    listEl.innerHTML = tickets.map(function(t) {
+      var removeBtn = canRemove
+        ? '<button class="tf-cancel" style="margin-left:auto;font-size:9px;padding:2px 7px;color:var(--red-light);border-color:rgba(220,38,38,0.3);" onclick="event.stopPropagation();dbRemoveTicket(\'' + personId + '\',\'' + t.key + '\')">✕ Убрать</button>'
+        : '';
+      return '<div class="ticket-item">'
+        + '<div class="ticket-item-header">'
+        + '<div class="ticket-reason">' + escHtml(t.reason) + '</div>'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;">'
+        + '<div class="ticket-date">' + escHtml(t.date) + '</div>'
+        + removeBtn
+        + '</div>'
+        + '</div>'
+        + '<div class="ticket-desc">' + escHtml(t.desc) + '</div>'
+        + '<div class="ticket-author">Выдан: ' + escHtml(t.author) + '</div>'
+        + '</div>';
+    }).join('');
+  }
+}
+
+function dbRemoveTicket(personId, ticketKey) {
+  if (ACCESS_LEVELS[curLevel] < 3) { alert('Недостаточный уровень допуска для удаления тикетов.'); return; }
+  fbDb.ref('tickets/' + personId + '/' + ticketKey).remove();
+}
+
+initFirebaseTickets();
 
 function dbBack() {
   document.getElementById('db-list-view').style.display = '';
@@ -1054,7 +1106,8 @@ function dbOpenPerson(personId) {
   document.getElementById('db-person-view').classList.remove('db-person-hidden');
 
   var tickets = getTickets(personId);
-  var canAddTicket = ACCESS_LEVELS[curLevel] >= 3;
+  var canAddTicket = ACCESS_LEVELS[curLevel] >= 2; // от B ранга
+  var canRemove = ACCESS_LEVELS[curLevel] >= 3; // от C ранга
 
   var statusClass = {gray:'badge-gray', amber:'badge-amber', red:'badge-red', green:'badge-green'}[person.statusColor] || 'badge-gray';
 
@@ -1063,10 +1116,16 @@ function dbOpenPerson(personId) {
     ticketsHtml = '<div class="ticket-empty">Тикетов нет</div>';
   } else {
     ticketsHtml = tickets.map(function(t, i) {
+      var removeBtn = canRemove
+        ? '<button class="tf-cancel" style="margin-left:auto;font-size:9px;padding:2px 7px;color:var(--red-light);border-color:rgba(220,38,38,0.3);" onclick="event.stopPropagation();dbRemoveTicket(\'' + personId + '\',\'' + t.key + '\')">✕ Убрать</button>'
+        : '';
       return '<div class="ticket-item">'
         + '<div class="ticket-item-header">'
         + '<div class="ticket-reason">' + escHtml(t.reason) + '</div>'
+        + '<div style="display:flex;align-items:center;gap:0.5rem;">'
         + '<div class="ticket-date">' + escHtml(t.date) + '</div>'
+        + removeBtn
+        + '</div>'
         + '</div>'
         + '<div class="ticket-desc">' + escHtml(t.desc) + '</div>'
         + '<div class="ticket-author">Выдан: ' + escHtml(t.author) + '</div>'
@@ -1132,24 +1191,19 @@ function dbSubmitTicket(personId) {
     return;
   }
 
-  // Добавляем только в localStorage (getTickets сам мержит с DB_PERSONS)
-  var localTickets = [];
-  try {
-    var stored = localStorage.getItem('lspd_tickets_' + personId);
-    if (stored) localTickets = JSON.parse(stored);
-  } catch(e) {}
-  localTickets.push({
+  if (ACCESS_LEVELS[curLevel] < 2) { alert('Недостаточный уровень допуска.'); return; }
+
+  // Записываем в Firebase — тикет будет виден всем пользователям
+  fbDb.ref('tickets/' + personId).push({
     reason: reason,
     date:   date,
     desc:   desc,
     author: 'Det. [' + curLevel + ']'
   });
-  try {
-    localStorage.setItem('lspd_tickets_' + personId, JSON.stringify(localTickets));
-  } catch(e) {}
 
-  // Перерендериваем список тикетов
-  dbOpenPerson(personId);
+  // Закрываем форму — список обновится автоматически через Firebase listener
+  var form = document.getElementById('ticket-form-' + personId);
+  if (form) form.classList.remove('open');
 }
 
 function escHtml(str) {
