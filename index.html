@@ -182,8 +182,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .ticker-item{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blue-light);letter-spacing:0.06em;}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .person-header{display:flex;gap:1.1rem;align-items:flex-start;margin-bottom:1.2rem;}
-.person-photo{width:76px;height:76px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center;line-height:1.6;overflow:hidden;padding:0;}
-.person-photo img{width:76px;height:76px;object-fit:cover;object-position:top center;border-radius:8px;display:block;}
+.person-photo{width:76px;height:76px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center;line-height:1.6;}
 .person-codename{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.08em;color:var(--text);line-height:1;}
 .person-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:0.2rem;letter-spacing:0.04em;}
 .trait-list{display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.5rem;}
@@ -334,6 +333,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="sidebar-label">Служебные Досье</div>
         <div class="nav-item" id="nav-kail" onclick="showPage('kail',3)"><div class="nav-dot">
         </div>Детектив Кайл<span class="nav-badge amber">C</span></div>
+        <div class="nav-item" id="nav-lando" onclick="showPage('lando',2)"><div class="nav-dot">
+        </div>Детектив Ландо<span class="nav-badge green">B</span></div>
 </div>
       
       <div class="sidebar-div"></div>
@@ -538,9 +539,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         </div>
         <hr class="page-divider">
         <div class="person-header">
-          <div class="person-photo">
-            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&q=80" alt="SEED" style="object-position:center center;" onerror="this.parentElement.innerHTML='НЕТ<br>ФОТО<br>—'">
-          </div>
+          <div class="person-photo">НЕТ<br>ФОТО<br>—</div>
           <div>
             <div class="person-codename">SEED</div>
             <div class="person-sub">Настоящее имя: НЕИЗВЕСТНО · Пол: предположительно мужской · Возраст: ~17 лет (2025)</div>
@@ -640,9 +639,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <hr class="page-divider">
 
   <div class="person-header">
-    <div class="person-photo">
-      <img src="https://images.pexels.com/photos/8369648/pexels-photo-8369648.jpeg" alt="Кайл Реймонд" onerror="this.parentElement.innerHTML='НЕТ<br>ФОТО<br>—'">
-    </div>
+    <div class="person-photo">НЕТ<br>ФОТО<br>—</div>
     <div>
       <div class="person-codename">РЕЙМОНД</div>
       <div class="person-sub">Кайл Реймонд · 26 лет · Гражданство: США</div>
@@ -683,7 +680,62 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div class="warn-text">Реймонд игнорирует указания руководства о закрытии дела Васкеса. Формально нарушений нет — дело остаётся открытым. Неформально — создаёт политическое напряжение внутри отдела. Источник утечки 2022 года официально не установлен. Внутренняя проверка закрыта.</div>
   </div>
 </div>
+
+
       
+
+<div class="page" id="page-lando">
+  <div class="page-header">
+    <div class="badge-row">
+      <span class="badge badge-amber">B-2-A</span>
+      <span class="badge badge-blue">Служебное досье</span>
+      <span class="badge badge-gray">Отдел оргпреступности</span>
+    </div>
+    <div class="page-title">Ландо Гарвард</div>
+    <div class="page-subtitle">Младший детектив · Отдел по борьбе с организованной преступностью · Активен</div>
+  </div>
+  <hr class="page-divider">
+
+  <div class="person-header">
+    <div class="person-photo">НЕТ<br>ФОТО<br>—</div>
+    <div>
+      <div class="person-codename">ГАРВАРД</div>
+      <div class="person-sub">Ландо Гарвард · 23 года · Гражданство: США</div>
+      <div class="person-sub" style="margin-top:0.15rem">Должность: Младший детектив · Стаж: 2 года · Статус: Активен</div>
+      <div class="trait-list">
+        <div class="trait">Быстрый</div>
+        <div class="trait">Прямой</div>
+        <div class="trait">Неопытный</div>
+        <div class="trait">Доверчивый</div>
+        <div class="trait">Интуитивный</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-cell"><div class="stat-key">Возраст</div><div class="stat-val">23 года</div></div>
+    <div class="stat-cell"><div class="stat-key">Звание получено</div><div class="stat-val">В 21 год</div></div>
+    <div class="stat-cell"><div class="stat-key">Активных дел</div><div class="stat-val amber">1 приоритетное</div></div>
+    <div class="stat-cell"><div class="stat-key">Начальник</div><div class="stat-val red">Кайл Реймонд</div></div>
+  </div>
+
+  <hr class="section-div">
+  <div class="slabel">Личное дело</div>
+  <div class="body-text">Родился и вырос в Саут-Лос-Сантосе. С ранних лет наблюдал влияние уличных группировок, в частности Vagos. Решение стать полицейским было личным выбором — стремление бороться с тем, что видел на улицах.</div>
+  <div class="body-text">Принят в LSPD четыре года назад. Взят под руководство старшего детектива Кайла Реймонда. Отличается быстрой реакцией и прямым стилем работы. Хорошо ориентируется в городских районах, знает их не по картам, а по личному опыту.</div>
+
+  <hr class="section-div">
+  <div class="slabel">Текущее дело · Los Santos Vagos</div>
+  <div class="body-text">Прикреплён к делу C-4-A. Работает в составе группы под началом Реймонда. Задачи — наблюдение, сбор информации, участие в оперативных мероприятиях.</div>
+  <div class="quote">"Толковый парень в нужных руках" - Уинстон Уэллс.</div>
+
+  <div class="warn-amber">
+    <div class="warn-label">Служебная пометка</div>
+    <div class="warn-text">Гарвард демонстрирует инициативность и готовность действовать быстро. Склонен к самостоятельным решениям, что требует дополнительного контроля со стороны руководства. Потенциал высок, но необходима корректировка дисциплины.</div>
+  </div>
+</div>
+      
+    
 
       <!-- WANTED -->
       <div class="page" id="page-wanted">
